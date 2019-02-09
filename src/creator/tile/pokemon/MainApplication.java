@@ -1,5 +1,4 @@
 package creator.tile.pokemon;
-import creator.tile.pokemon.modelo.Image;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,12 +9,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
 
 import static creator.tile.pokemon.ApplicationManager.INSTANCE;
 
 public class MainApplication {
-    private JPanel calculatorView;
+    private JPanel advenceTileView;
     private JButton uploadButton;
+    private JTabbedPane tabbedPane1;
 
     final JFileChooser fileChooser = new JFileChooser();
 
@@ -68,10 +69,15 @@ public class MainApplication {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame("MainApplication");
-                frame.setContentPane(new MainApplication().calculatorView);
+                frame.setTitle("Advance Pokemon Tile Creator");
+                frame.setContentPane(new MainApplication().advenceTileView);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setVisible(true);
+
+                //Sets window Icon
+                URL url = ClassLoader.getSystemResource("creator/tile/pokemon/resources/icon.png");
+                frame.setIconImage(Toolkit.getDefaultToolkit().createImage(url));
             }
         });
     }
