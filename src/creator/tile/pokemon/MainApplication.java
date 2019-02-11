@@ -1,9 +1,16 @@
 package creator.tile.pokemon;
 
+import com.sun.source.util.Plugin;
+import creator.tile.pokemon.MEH.IO.BankLoader;
+import org.zzl.minegaming.GBAUtils.*;
+//import us.plxhack.MEH.IO.MapIO;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,13 +22,55 @@ import static creator.tile.pokemon.ApplicationManager.INSTANCE;
 
 public class MainApplication {
     private JPanel advenceTileView;
+    private JButton loadRomButton;
     private JButton uploadButton;
     private JTabbedPane tabbedPane1;
+
+    public JTree mapBanks;
+    private JLabel statusLabel;
 
     final JFileChooser fileChooser = new JFileChooser();
 
     public MainApplication() {
+        loadRomButton.addActionListener(new LoadRom());
         uploadButton.addActionListener(new ImageUpload());
+    }
+
+    private class LoadRom implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int romState = GBARom.loadRom();
+            switch (romState){
+                case -2 :
+                    JOptionPane.showMessageDialog(null, "The ROM could not be opened.\nIt may be open in another program.", "Error opening ROM", JOptionPane.WARNING_MESSAGE);
+                    break;
+                case -1: return;
+                default: startLoadingRom();
+            }
+        }
+    }
+
+    private void startLoadingRom(){
+        String s = Plugin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        System.out.println(s);
+
+        /*if (MapIO.DEBUG)
+            System.out.println(s);*/
+        INSTANCE.dataStore = new DataStore("MEH.ini", ROMManager.currentROM.getGameCode());
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(null);
+        DefaultTreeModel mapTree = new DefaultTreeModel(root);
+        DefaultMutableTreeNode byBank = new DefaultMutableTreeNode("Maps by Tileset");
+        root.add(byBank);
+        mapBanks.setRootVisible(false);
+        mapBanks.setModel(mapTree);
+
+
+        statusLabel.setText("Loading...");
+
+        //Change From BankLoader to Tiles loader, need understand how he loads tiles;_;
+        BankLoader.reset();
+        new BankLoader((int) DataStore.MapHeaders, ROMManager.getActiveROM(), statusLabel, mapBanks, byBank).start();
     }
 
     private class ImageUpload implements ActionListener {

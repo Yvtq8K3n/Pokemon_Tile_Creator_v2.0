@@ -42,14 +42,34 @@
         <properties/>
         <border type="none"/>
         <children>
+          <component id="c3703" class="javax.swing.JButton" binding="loadRomButton">
+            <constraints/>
+            <properties>
+              <text value="Button"/>
+            </properties>
+          </component>
           <component id="2f495" class="javax.swing.JButton" binding="uploadButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="Load Image"/>
             </properties>
           </component>
+          <component id="fae2a" class="javax.swing.JLabel" binding="statusLabel">
+            <constraints/>
+            <properties>
+              <text value="Label"/>
+            </properties>
+          </component>
         </children>
       </toolbar>
+      <component id="ddc2e" class="javax.swing.JTree" binding="mapBanks">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
     </children>
   </grid>
 </form>
