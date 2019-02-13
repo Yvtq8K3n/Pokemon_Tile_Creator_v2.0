@@ -2,18 +2,22 @@ package creator.tile.pokemon;
 
 import com.sun.source.util.Plugin;
 import creator.tile.pokemon.MEH.IO.BankLoader;
+import creator.tile.pokemon.MEH.IO.MapIO;
 import org.zzl.minegaming.GBAUtils.*;
 //import us.plxhack.MEH.IO.MapIO;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
@@ -24,7 +28,6 @@ public class MainApplication {
     private JPanel advenceTileView;
     private JButton loadRomButton;
     private JButton uploadButton;
-    private JTabbedPane tabbedPane1;
 
     public JTree mapBanks;
     private JLabel statusLabel;
@@ -58,6 +61,10 @@ public class MainApplication {
             System.out.println(s);*/
         INSTANCE.dataStore = new DataStore("MEH.ini", ROMManager.currentROM.getGameCode());
 
+        JPanel mapPanelFrame = new JPanel();
+        mapPanelFrame.setPreferredSize(new Dimension(242, 10));
+        mapPanelFrame.setLayout(new BorderLayout(0, 0));
+
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(null);
         DefaultTreeModel mapTree = new DefaultTreeModel(root);
         DefaultMutableTreeNode byBank = new DefaultMutableTreeNode("Maps by Tileset");
@@ -71,7 +78,12 @@ public class MainApplication {
         //Change From BankLoader to Tiles loader, need understand how he loads tiles;_;
         BankLoader.reset();
         new BankLoader((int) DataStore.MapHeaders, ROMManager.getActiveROM(), statusLabel, mapBanks, byBank).start();
+
+
+        addEventListeners();
     }
+
+
 
     private class ImageUpload implements ActionListener {
         @Override
@@ -94,6 +106,64 @@ public class MainApplication {
             }
         }
     }
+
+
+    private void addEventListeners() {
+        mapBanks.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                try {
+                    Object node = e.getPath().getPath()[e.getPath().getPath().length - 1];
+                    if (node instanceof BankLoader.MapTreeNode){
+                        MapIO.selectedBank = ((BankLoader.MapTreeNode)node).bank;
+                        MapIO.selectedMap = ((BankLoader.MapTreeNode)node).map;
+                    }
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        /////////////
+        mapBanks.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        mapBanks.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    // Find a more streamlined way to detect that a node was not expanded
+                    if (e.getClickCount() == 2) {
+                        try
+                        {
+                            if (mapBanks.getModel().getIndexOfChild(mapBanks.getModel().getRoot(), mapBanks.getSelectionPath().getLastPathComponent()) == -1) {
+                                // mapEditorPanel.reset();
+                                System.out.println("Load about to happen");
+
+                                MapIO.loadMap();
+                                //enableMapOperationButtons();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    
+    public void updateTree() {
+        Object root = mapBanks.getModel().getRoot();
+        Object type = mapBanks.getModel().getChild(root, 1);
+        Object folder = mapBanks.getModel().getChild(type, MapIO.selectedBank);
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)(mapBanks.getModel().getChild(folder, MapIO.selectedMap));
+        TreePath path = new TreePath(node.getPath());
+        mapBanks.setSelectionPath(path);
+        //mapBanks.setExpandsSelectedPaths(true);
+        mapBanks.scrollPathToVisible(path);
+    }
+
+
 
     //Temporary
     public void displayImage(){
